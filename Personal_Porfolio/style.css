@@ -1,0 +1,904 @@
+  * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            background: #8B7355;
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 100vh;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="8" fill="%23D4A574"/></svg>'), auto;
+            touch-action: pan-x;
+            scrollbar-width: thin;
+            scrollbar-color: #C17A5C #8B6F47;
+        }
+
+        body::-webkit-scrollbar {
+            height: 12px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: #8B6F47;
+            border-top: 3px solid #6B5638;
+            border-bottom: 3px solid #6B5638;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #C17A5C 0%, #A67C52 100%);
+            border-radius: 6px;
+            border: 2px solid #8B6F47;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #D4A574 0%, #C17A5C 100%);
+            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.3);
+        }
+
+        body::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #E8C4A0 0%, #D4A574 100%);
+        }
+
+        .game-world {
+            display: flex;
+            height: 100vh;
+            width: max(400vw, 2400px);
+            position: relative;
+        }
+
+        .level {
+            min-width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border-right: 4px dashed #D4A574;
+        }
+
+        .sky-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 400vw;
+            height: 60%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .sky-back {
+            background: linear-gradient(180deg, #D4A574 0%, #C19A6B 50%, #A67C52 100%);
+        }
+
+        .clouds {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            animation: float 20s infinite ease-in-out;
+            will-change: transform;
+        }
+
+        .cloud:before, .cloud:after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .ground {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 400vw;
+            height: 120px;
+            background: #8B6F47;
+            border-top: 6px solid #6B5638;
+            z-index: 1;
+        }
+
+        .ground:before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: repeating-linear-gradient(
+                90deg,
+                #D4A574 0px,
+                #D4A574 20px,
+                transparent 20px,
+                transparent 40px
+            );
+        }
+
+        .grass {
+            position: absolute;
+            top: -15px;
+            width: 100%;
+            height: 15px;
+            background: repeating-linear-gradient(
+                90deg,
+                #9C7F5C 0px,
+                #9C7F5C 3px,
+                transparent 3px,
+                transparent 8px
+            );
+        }
+
+        .western-building {
+            position: absolute;
+            bottom: 120px;
+            width: 120px;
+            height: 150px;
+            background: #8B6F47;
+            border: 4px solid #5C4033;
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        .western-building:before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: #6B5638;
+            border-bottom: 4px solid #5C4033;
+        }
+
+        .western-building:after {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            color: #D4A574;
+            text-shadow: 1px 1px 0 #5C4033;
+        }
+
+        .western-building.saloon:after { content: 'SALOON'; }
+        .western-building.general-store:after { content: 'GENERAL STORE'; }
+        .western-building.sheriff:after { content: 'SHERIFF'; }
+        .western-building.bank:after { content: 'BANK'; }
+        .western-building.blacksmith:after { content: 'BLACKSMITH'; }
+        .western-building.livery:after { content: 'LIVERY'; }
+        .western-building.stable:after { content: 'STABLE'; }
+
+        .western-building .window {
+            position: absolute;
+            background: #E8C4A0;
+            border: 2px solid #3C2F2F;
+        }
+
+        .western-building .door {
+            position: absolute;
+            bottom: 0;
+            background: #6B5638;
+            border: 2px solid #3C2F2F;
+        }
+
+        .western-building.saloon .window {
+            width: 20px;
+            height: 30px;
+            top: 30px;
+            left: 20px;
+        }
+
+        .western-building.saloon .window:nth-child(2) {
+            left: 80px;
+        }
+
+        .western-building.saloon .door {
+            width: 40px;
+            height: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .western-building.general-store {
+            width: 140px;
+            height: 160px;
+        }
+
+        .western-building.general-store .window {
+            width: 30px;
+            height: 40px;
+            top: 30px;
+            left: 20px;
+        }
+
+        .western-building.general-store .window:nth-child(2) {
+            left: 90px;
+        }
+
+        .western-building.general-store .door {
+            width: 40px;
+            height: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .western-building.sheriff {
+            width: 100px;
+            height: 130px;
+            border-top-right-radius: 20px;
+        }
+
+        .western-building.sheriff .window {
+            width: 20px;
+            height: 20px;
+            top: 30px;
+            left: 20px;
+            border-radius: 50%;
+        }
+
+        .western-building.sheriff .door {
+            width: 30px;
+            height: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .western-building.bank {
+            width: 150px;
+            height: 170px;
+            border: 4px solid #3C2F2F;
+        }
+
+        .western-building.bank .window {
+            width: 25px;
+            height: 35px;
+            top: 30px;
+            left: 20px;
+        }
+
+        .western-building.bank .window:nth-child(2) {
+            left: 100px;
+        }
+
+        .western-building.bank .door {
+            width: 40px;
+            height: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 3px solid #3C2F2F;
+        }
+
+        .western-building.blacksmith {
+            width: 130px;
+            height: 140px;
+        }
+
+        .western-building.blacksmith:before {
+            background: #4A3728;
+        }
+
+        .western-building.blacksmith .window {
+            width: 20px;
+            height: 20px;
+            top: 30px;
+            left: 20px;
+        }
+
+        .western-building.blacksmith .window:nth-child(2) {
+            left: 90px;
+        }
+
+        .western-building.blacksmith .door {
+            width: 50px;
+            height: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .western-building.livery {
+            width: 160px;
+            height: 120px;
+        }
+
+        .western-building.livery .window {
+            width: 30px;
+            height: 30px;
+            top: 20px;
+            left: 20px;
+        }
+
+        .western-building.livery .window:nth-child(2) {
+            left: 110px;
+        }
+
+        .western-building.livery .door {
+            width: 60px;
+            height: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .western-building.stable {
+            width: 140px;
+            height: 110px;
+            background: #7A5C3A;
+        }
+
+        .western-building.stable .window {
+            width: 20px;
+            height: 20px;
+            top: 20px;
+            left: 20px;
+        }
+
+        .western-building.stable .window:nth-child(2) {
+            left: 100px;
+        }
+
+        .western-building.stable .door {
+            width: 70px;
+            height: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 2px dashed #3C2F2F;
+        }
+
+        .horse {
+            position: absolute;
+            bottom: 120px;
+            width: 60px;
+            height: 40px;
+            background: #5C4033;
+            border: 3px solid #3C2F2F;
+            border-radius: 10px;
+            animation: trot 1.5s infinite steps(2);
+            z-index: 1;
+        }
+
+        .horse:before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            width: 20px;
+            height: 20px;
+            background: #5C4033;
+            border-radius: 50%;
+            border: 3px solid #3C2F2F;
+        }
+
+        @keyframes trot {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .character {
+            position: fixed;
+            bottom: 120px;
+            left: 10%;
+            width: 60px;
+            height: 60px;
+            z-index: 2;
+            transition: transform 0.2s ease-out, left 0.3s ease-out;
+            will-change: transform, left;
+        }
+
+        .character.walking {
+            animation: walk 0.4s steps(2) infinite;
+        }
+
+        .character.jumping {
+            animation: jump 0.6s ease-in-out;
+        }
+
+        @keyframes walk {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes jump {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-80px); }
+            100% { transform: translateY(0); }
+        }
+
+        .pixel-character {
+            width: 100%;
+            height: 100%;
+            background: #D4A574;
+            position: relative;
+            image-rendering: pixelated;
+        }
+
+        .content-box {
+            background: rgba(212, 165, 116, 0.95);
+            border: 6px solid #8B6F47;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: min(90vw, 700px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 5;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 2.2rem);
+            color: #5C4033;
+            margin-bottom: 1rem;
+            text-shadow: 3px 3px 0 rgba(139, 111, 71, 0.3);
+        }
+
+        h2 {
+            font-size: clamp(1.3rem, 4vw, 1.6rem);
+            color: #6B5638;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 0 rgba(139, 111, 71, 0.3);
+        }
+
+        h3 {
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            color: #fff;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        p {
+            font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+            line-height: 1.6;
+            color: #5C4033;
+            margin-bottom: 0.8rem;
+        }
+
+        .role {
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            color: #3C2F2F;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 6px solid #8B6F47;
+            object-fit: cover;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .projects-grid {
+            display: flex;
+            flex-direction: row;
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+            scrollbar-color: #C17A5C #E8C4A0;
+        }
+
+        .projects-grid::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .projects-grid::-webkit-scrollbar-track {
+            background: #E8C4A0;
+            border-radius: 5px;
+            border: 2px solid #8B6F47;
+        }
+
+        .projects-grid::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #C17A5C 0%, #A67C52 100%);
+            border-radius: 5px;
+            border: 2px solid #8B6F47;
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.2);
+        }
+
+        .projects-grid::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #D4A574 0%, #C17A5C 100%);
+        }
+
+        .project-block {
+            background-size: cover;
+            background-position: center;
+            border: 4px solid #8B6F47;
+            border-radius: 12px;
+            padding: 1.2rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 0.6rem;
+            min-width: min(280px, 75vw);
+            height: 320px;
+            scroll-snap-align: start;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .project-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                rgba(0, 0, 0, 0.3) 0%, 
+                rgba(0, 0, 0, 0.5) 50%, 
+                rgba(0, 0, 0, 0.8) 100%);
+            z-index: 1;
+            transition: background 0.3s ease;
+        }
+
+        .project-block:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            border-color: #C17A5C;
+        }
+
+        .project-block:hover::before {
+            background: linear-gradient(to bottom, 
+                rgba(0, 0, 0, 0.4) 0%, 
+                rgba(0, 0, 0, 0.6) 50%, 
+                rgba(0, 0, 0, 0.85) 100%);
+        }
+
+        .project-block h3 {
+            margin: 0;
+            position: relative;
+            z-index: 2;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+        }
+
+        .project-block p {
+            font-size: clamp(0.6rem, 2vw, 0.7rem);
+            position: relative;
+            z-index: 2;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .project-tech {
+            font-size: clamp(0.55rem, 1.8vw, 0.65rem);
+            color: #F4D03F;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .preview-button {
+            background: #C17A5C;
+            color: #fff;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            z-index: 2;
+            position: relative;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-button:hover {
+            background: #A67C52;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: row;
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+            scrollbar-color: #C17A5C #E8C4A0;
+        }
+
+        .timeline::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .timeline::-webkit-scrollbar-track {
+            background: #E8C4A0;
+            border-radius: 5px;
+            border: 2px solid #8B6F47;
+        }
+
+        .timeline::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #C17A5C 0%, #A67C52 100%);
+            border-radius: 5px;
+            border: 2px solid #8B6F47;
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.2);
+        }
+
+        .timeline::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #D4A574 0%, #C17A5C 100%);
+        }
+
+        .checkpoint {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid #C17A5C;
+            padding: 1.2rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            min-width: min(260px, 75vw);
+            scroll-snap-align: start;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .checkpoint:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .checkpoint h3 {
+            margin: 0 0 0.5rem 0;
+            color: #5C4033;
+            text-shadow: none;
+        }
+
+        .contact-flags {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .flag {
+            background: #E8C4A0;
+            border: 4px solid #8B6F47;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            color: #5C4033;
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flag:before {
+            content: '▶';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            transition: left 0.3s ease;
+        }
+
+        .flag:hover {
+            background: #C17A5C;
+            color: #fff;
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .flag:hover:before {
+            left: 10px;
+        }
+
+        .coin {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #F4D03F;
+            border: 3px solid #D4A017;
+            border-radius: 50%;
+            animation: spin 2s linear infinite, float 3s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            0%, 100% { transform: scaleX(1); }
+            50% { transform: scaleX(0.3); }
+        }
+
+        .block-item {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #C17A5C;
+            border: 4px solid #8B6F47;
+            border-radius: 8px;
+        }
+
+        .scroll-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(212, 165, 116, 0.9);
+            border: 3px solid #8B6F47;
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            color: #5C4033;
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .game-world {
+                width: 2400px;
+            }
+
+            .level {
+                padding: 1rem;
+                min-width: 600px;
+            }
+
+            .content-box {
+                max-height: 70vh;
+                overflow-y: auto;
+                padding: 1.5rem;
+                max-width: 90vw;
+                scrollbar-width: thin;
+                scrollbar-color: #C17A5C #E8C4A0;
+            }
+
+            .content-box::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .content-box::-webkit-scrollbar-track {
+                background: #E8C4A0;
+                border-radius: 4px;
+                border: 1px solid #8B6F47;
+            }
+
+            .content-box::-webkit-scrollbar-thumb {
+                background: linear-gradient(180deg, #C17A5C 0%, #A67C52 100%);
+                border-radius: 4px;
+                border: 1px solid #8B6F47;
+            }
+
+            .content-box::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(180deg, #D4A574 0%, #C17A5C 100%);
+            }
+
+            .character {
+                left: 5%;
+                width: 50px;
+                height: 50px;
+                bottom: 130px;
+                opacity: 0.9;
+            }
+
+            .ground {
+                height: 100px;
+            }
+
+            .profile-image {
+                width: 120px;
+                height: 120px;
+            }
+
+            .project-block {
+                height: 280px;
+            }
+
+            .contact-flags {
+                gap: 1rem;
+            }
+
+            .western-building:before {
+                top: -15px;
+                height: 15px;
+            }
+
+            .western-building:after {
+                font-size: 0.5rem;
+                top: -25px;
+            }
+
+            .western-building .window {
+                transform: scale(0.8);
+            }
+
+            .western-building .door {
+                transform: translateX(-50%) scale(0.8);
+            }
+
+            .horse {
+                width: 50px;
+                height: 35px;
+            }
+
+            .horse:before {
+                width: 15px;
+                height: 15px;
+                top: -8px;
+                left: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .level {
+                min-width: 500px;
+            }
+
+            .content-box {
+                padding: 1rem;
+                max-height: 65vh;
+            }
+
+            .character {
+                width: 40px;
+                height: 40px;
+                bottom: 110px;
+            }
+
+            .scroll-hint {
+                bottom: 15px;
+                right: 15px;
+                padding: 0.5rem 1rem;
+            }
+
+            .profile-image {
+                width: 100px;
+                height: 100px;
+            }
+
+            .project-block,
+            .checkpoint {
+                min-width: min(240px, 80vw);
+            }
+
+            .project-block {
+                height: 260px;
+            }
+
+            .western-building .window {
+                transform: scale(0.7);
+            }
+
+            .western-building .door {
+                transform: translateX(-50%) scale(0.7);
+            }
+        }
